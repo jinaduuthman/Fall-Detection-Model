@@ -35,7 +35,7 @@ if st.button('Predict'):
     with st.expander("See Prediction Result", expanded=True):
         if prediction[0]:
             # Fall Detected
-            st.markdown(f"<div style='background-color:lightcoral; padding: 10px; border-radius: 5px;'> <h2 style='color: white;'>Fall Detected</h2></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background-color:lightcoral; padding: 10px; border-radius: 5px;'> <h2 style='color: white;'>Fall Detected, Dialing 911....</h2></div>", unsafe_allow_html=True)
         else:
             # No Fall Detected
             st.markdown(f"<div style='background-color:lightgreen; padding: 10px; border-radius: 5px;'><h2 style='color: white;'>No Fall Detected</h2></div>", unsafe_allow_html=True)
