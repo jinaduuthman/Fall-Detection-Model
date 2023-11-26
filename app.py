@@ -83,7 +83,7 @@ st.title('Fall Detection Prediction')
 col1, col2 = st.columns(2)
 
 # Display data if available (outside button click logic)
-display_data(st.session_state['accelerometer_data'], st.session_state['gyroscope_data'], col1)
+# display_data(st.session_state['accelerometer_data'], st.session_state['gyroscope_data'], col1)
 
 
 # Column 1 for Refresh Data
