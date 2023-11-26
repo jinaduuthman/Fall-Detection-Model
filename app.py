@@ -85,16 +85,6 @@ st.title('Fall Detection Prediction')
 # Create two columns
 col1, col2 = st.columns(2)
 
-# Display data if available (outside button click logic)
-# display_data(st.session_state['accelerometer_data'], st.session_state['gyroscope_data'], col1)
-
-
-# # Column 1 for Refresh Data
-# with col1:
-#     if st.button('Refresh Data'):
-#         st.session_state['accelerometer_data'], st.session_state['gyroscope_data'] = get_sensor_data()
-#         display_data(st.session_state['accelerometer_data'], st.session_state['gyroscope_data'], col1)
-
 # Column 1 for Refresh Data
 with col1:
     if st.button('Refresh Data'):
@@ -104,27 +94,6 @@ with col1:
     # Display data if refreshed
     if st.session_state['data_refreshed']:
         display_data(st.session_state['accelerometer_data'], st.session_state['gyroscope_data'], col1)
-
-
-# # Column 2 for Predict
-# with col2:
-#     if st.button('Predict'):
-#         # Use the data from session state
-#         if st.session_state['accelerometer_data'] and st.session_state['gyroscope_data']:
-#             ax, ay, az, gx, gy, gz = display_data_(st.session_state['accelerometer_data'], st.session_state['gyroscope_data'])
-
-#             # Proceed with prediction
-#             prediction = predict_outcome([ax, ay, az, gx, gy, gz])
-#             # Using an expander to simulate a modal
-#             with st.expander("See Prediction Result", expanded=True):
-#                 if prediction[0]:
-#                     # Fall Detected
-#                     st.markdown(f"<div style='background-color:lightcoral; padding: 10px; border-radius: 5px;'> <h2 style='color: white;'>Fall Detected, Dialing 911....</h2></div>", unsafe_allow_html=True)
-#                 else:
-#                     # No Fall Detected
-#                     st.markdown(f"<div style='background-color:lightgreen; padding: 10px; border-radius: 5px;'><h2 style='color: white;'>No Fall Detected</h2></div>", unsafe_allow_html=True)
-#         else:
-#             st.warning("No data available. Please refresh data first.")
 
 
 # Column 2 for Predict
