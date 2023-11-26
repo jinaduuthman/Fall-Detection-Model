@@ -37,18 +37,6 @@ def display_data_(accelerometer_data, gyroscope_data):
     gy = gyroscope_data.get('y', 0) if gyroscope_data else 0
     gz = gyroscope_data.get('z', 0) if gyroscope_data else 0
 
-    # Display the accelerometer data
-    st.subheader("Accelerometer Data:")
-    st.metric(label="AX (Accelerometer X)", value=f"{ax:.6f}")
-    st.metric(label="AY (Accelerometer Y)", value=f"{ay:.6f}")
-    st.metric(label="AZ (Accelerometer Z)", value=f"{az:.6f}")
-
-    # Display the gyroscope data
-    st.subheader("Gyroscope Data:")
-    st.metric(label="GX (Gyroscope X)", value=f"{gx:.6f}")
-    st.metric(label="GY (Gyroscope Y)", value=f"{gy:.6f}")
-    st.metric(label="GZ (Gyroscope Z)", value=f"{gz:.6f}")
-
     return ax, ay, az, gx, gy, gz
 
 
