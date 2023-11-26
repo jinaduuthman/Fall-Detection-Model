@@ -26,29 +26,8 @@ def get_sensor_data():
     
     return accelerometer_data, gyroscope_data
 
+#THis version of display_data- is only used for the predict button.
 def display_data_(accelerometer_data, gyroscope_data):
-    # 使用 Streamlit 组件显示加速度计数据
-    if accelerometer_data:
-        ax = accelerometer_data.get('x', 0)
-        ay = accelerometer_data.get('y', 0)
-        az = accelerometer_data.get('z', 0)
-
-        st.metric(label="AX (Accelerometer X)", value=f"{ax:.6f}")
-        st.metric(label="AY (Accelerometer Y)", value=f"{ay:.6f}")
-        st.metric(label="AZ (Accelerometer Z)", value=f"{az:.6f}")
-
-    # 使用 Streamlit 组件显示陀螺仪数据
-    if gyroscope_data:
-        gx = gyroscope_data.get('x', 0)
-        gy = gyroscope_data.get('y', 0)
-        gz = gyroscope_data.get('z', 0)
-
-        st.metric(label="GX (Gyroscope X)", value=f"{gx:.6f}")
-        st.metric(label="GY (Gyroscope Y)", value=f"{gy:.6f}")
-        st.metric(label="GZ (Gyroscope Z)", value=f"{gz:.6f}")
-
-
-def display_data(accelerometer_data, gyroscope_data):
     # Extract the accelerometer and gyroscope data
     ax = accelerometer_data.get('x', 0) if accelerometer_data else 0
     ay = accelerometer_data.get('y', 0) if accelerometer_data else 0
@@ -73,6 +52,33 @@ def display_data(accelerometer_data, gyroscope_data):
     return ax, ay, az, gx, gy, gz
 
 
+
+def display_data(accelerometer_data, gyroscope_data, column):
+    # Extract the accelerometer and gyroscope data
+    with column:
+        ax = accelerometer_data.get('x', 0) if accelerometer_data else 0
+        ay = accelerometer_data.get('y', 0) if accelerometer_data else 0
+        az = accelerometer_data.get('z', 0) if accelerometer_data else 0
+
+        gx = gyroscope_data.get('x', 0) if gyroscope_data else 0
+        gy = gyroscope_data.get('y', 0) if gyroscope_data else 0
+        gz = gyroscope_data.get('z', 0) if gyroscope_data else 0
+
+        # Display the accelerometer data
+        st.subheader("Accelerometer Data:")
+        st.metric(label="AX (Accelerometer X)", value=f"{ax:.6f}")
+        st.metric(label="AY (Accelerometer Y)", value=f"{ay:.6f}")
+        st.metric(label="AZ (Accelerometer Z)", value=f"{az:.6f}")
+
+        # Display the gyroscope data
+        st.subheader("Gyroscope Data:")
+        st.metric(label="GX (Gyroscope X)", value=f"{gx:.6f}")
+        st.metric(label="GY (Gyroscope Y)", value=f"{gy:.6f}")
+        st.metric(label="GZ (Gyroscope Z)", value=f"{gz:.6f}")
+
+    return ax, ay, az, gx, gy, gz
+
+
 # Streamlit app layout
 st.title('Fall Detection Prediction')
 
@@ -83,14 +89,14 @@ col1, col2 = st.columns(2)
 with col1:
     if st.button('Refresh Data'):
         accelerometer_data, gyroscope_data = get_sensor_data()
-        display_data(accelerometer_data, gyroscope_data)
+        display_data(accelerometer_data, gyroscope_data, col1)
 
 # Column 2 for Predict
 with col2:
     if st.button('Predict'):
         # Fetch the latest data
         accelerometer_data, gyroscope_data = get_sensor_data()
-        ax, ay, az, gx, gy, gz = display_data(accelerometer_data, gyroscope_data)
+        ax, ay, az, gx, gy, gz = display_data_(accelerometer_data, gyroscope_data)
 
         # Proceed with prediction
         prediction = predict_outcome([ax, ay, az, gx, gy, gz])
