@@ -19,9 +19,6 @@ def predict_outcome(features):
     prediction = rf_model.predict(input_data)
     return prediction
 
-# Streamlit app layout
-st.title('Fall Detection Prediction')
-
 def get_sensor_data():
     # 从 Firebase 获取加速度计和陀螺仪数据
     accelerometer_data = firebase_db.get('/Accelerometer', None)
@@ -75,43 +72,33 @@ def display_data(accelerometer_data, gyroscope_data):
 
     return ax, ay, az, gx, gy, gz
 
-# Example usage in Streamlit app
-# accelerometer_data, gyroscope_data = get_sensor_data()  # Assuming you have a function to fetch this data
-# ax, ay, az, gx, gy, gz = display_data(accelerometer_data, gyroscope_data)
 
+# Streamlit app layout
+st.title('Fall Detection Prediction')
 
+# Create two columns
+col1, col2 = st.columns(2)
 
-# Input fields for features
-# ax = st.number_input('AX', format="%.6f")
-# ay = st.number_input('AY', format="%.6f")
-# az = st.number_input('AZ', format="%.6f")
-# gx = st.number_input('GX', format="%.6f")
-# gy = st.number_input('GY', format="%.6f")
-# gz = st.number_input('GZ', format="%.6f")
+# Column 1 for Refresh Data
+with col1:
+    if st.button('Refresh Data'):
+        accelerometer_data, gyroscope_data = get_sensor_data()
+        display_data(accelerometer_data, gyroscope_data)
 
+# Column 2 for Predict
+with col2:
+    if st.button('Predict'):
+        # Fetch the latest data
+        accelerometer_data, gyroscope_data = get_sensor_data()
+        ax, ay, az, gx, gy, gz = display_data(accelerometer_data, gyroscope_data)
 
-# Button to refresh data
-if st.button('Refresh Data'):
-    accelerometer_data, gyroscope_data = get_sensor_data()
-    display_data(accelerometer_data, gyroscope_data)
-
-    
-# Button to make prediction
-if st.button('Predict'):
-    # Fetch the latest data
-    accelerometer_data, gyroscope_data = get_sensor_data()
-    ax, ay, az, gx, gy, gz = display_data(accelerometer_data, gyroscope_data)
-
-    # Proceed with prediction
-    prediction = predict_outcome([ax, ay, az, gx, gy, gz])
-    # Using an expander to simulate a modal
-    with st.expander("See Prediction Result", expanded=True):
-        if prediction[0]:
-            # Fall Detected
-            st.markdown(f"<div style='background-color:lightcoral; padding: 10px; border-radius: 5px;'> <h2 style='color: white;'>Fall Detected, Dialing 911....</h2></div>", unsafe_allow_html=True)
-        else:
-            # No Fall Detected
-            st.markdown(f"<div style='background-color:lightgreen; padding: 10px; border-radius: 5px;'><h2 style='color: white;'>No Fall Detected</h2></div>", unsafe_allow_html=True)
-    # st.write(f'Prediction: {"Fall Detected" if prediction[0] else "No Fall Detected"}')
-
-# Run the Streamlit app by navigating to the app's directory and running 'streamlit run app.py'
+        # Proceed with prediction
+        prediction = predict_outcome([ax, ay, az, gx, gy, gz])
+        # Using an expander to simulate a modal
+        with st.expander("See Prediction Result", expanded=True):
+            if prediction[0]:
+                # Fall Detected
+                st.markdown(f"<div style='background-color:lightcoral; padding: 10px; border-radius: 5px;'> <h2 style='color: white;'>Fall Detected, Dialing 911....</h2></div>", unsafe_allow_html=True)
+            else:
+                # No Fall Detected
+                st.markdown(f"<div style='background-color:lightgreen; padding: 10px; border-radius: 5px;'><h2 style='color: white;'>No Fall Detected</h2></div>", unsafe_allow_html=True)
