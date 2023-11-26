@@ -1,9 +1,16 @@
 import streamlit as st
 import pandas as pd
 import joblib
+from firebase import firebase
+import streamlit as st
+import time
 
 # Load the trained model (ensure it's in the same directory or provide the full path)
 rf_model = joblib.load('random_forest_model.pkl')
+
+#Firebase settings config
+firebase_url = 'https://falldetection-6c89a-default-rtdb.firebaseio.com/'
+firebase_db = firebase.FirebaseApplication(firebase_url, None)
 
 def predict_outcome(features):
     # Convert input data into a DataFrame
@@ -15,22 +22,88 @@ def predict_outcome(features):
 # Streamlit app layout
 st.title('Fall Detection Prediction')
 
-# Input fields for features
-ax = st.number_input('AX', format="%.6f")
-ay = st.number_input('AY', format="%.6f")
-az = st.number_input('AZ', format="%.6f")
-gx = st.number_input('GX', format="%.6f")
-gy = st.number_input('GY', format="%.6f")
-gz = st.number_input('GZ', format="%.6f")
+def get_sensor_data():
+    # 从 Firebase 获取加速度计和陀螺仪数据
+    accelerometer_data = firebase_db.get('/Accelerometer', None)
+    gyroscope_data = firebase_db.get('/Gyroscope', None)
+    
+    return accelerometer_data, gyroscope_data
 
+def display_data_(accelerometer_data, gyroscope_data):
+    # 使用 Streamlit 组件显示加速度计数据
+    if accelerometer_data:
+        ax = accelerometer_data.get('x', 0)
+        ay = accelerometer_data.get('y', 0)
+        az = accelerometer_data.get('z', 0)
+
+        st.metric(label="AX (Accelerometer X)", value=f"{ax:.6f}")
+        st.metric(label="AY (Accelerometer Y)", value=f"{ay:.6f}")
+        st.metric(label="AZ (Accelerometer Z)", value=f"{az:.6f}")
+
+    # 使用 Streamlit 组件显示陀螺仪数据
+    if gyroscope_data:
+        gx = gyroscope_data.get('x', 0)
+        gy = gyroscope_data.get('y', 0)
+        gz = gyroscope_data.get('z', 0)
+
+        st.metric(label="GX (Gyroscope X)", value=f"{gx:.6f}")
+        st.metric(label="GY (Gyroscope Y)", value=f"{gy:.6f}")
+        st.metric(label="GZ (Gyroscope Z)", value=f"{gz:.6f}")
+
+
+def display_data(accelerometer_data, gyroscope_data):
+    # Extract the accelerometer and gyroscope data
+    ax = accelerometer_data.get('x', 0) if accelerometer_data else 0
+    ay = accelerometer_data.get('y', 0) if accelerometer_data else 0
+    az = accelerometer_data.get('z', 0) if accelerometer_data else 0
+
+    gx = gyroscope_data.get('x', 0) if gyroscope_data else 0
+    gy = gyroscope_data.get('y', 0) if gyroscope_data else 0
+    gz = gyroscope_data.get('z', 0) if gyroscope_data else 0
+
+    # Display the accelerometer data
+    st.subheader("Accelerometer Data:")
+    st.metric(label="AX (Accelerometer X)", value=f"{ax:.6f}")
+    st.metric(label="AY (Accelerometer Y)", value=f"{ay:.6f}")
+    st.metric(label="AZ (Accelerometer Z)", value=f"{az:.6f}")
+
+    # Display the gyroscope data
+    st.subheader("Gyroscope Data:")
+    st.metric(label="GX (Gyroscope X)", value=f"{gx:.6f}")
+    st.metric(label="GY (Gyroscope Y)", value=f"{gy:.6f}")
+    st.metric(label="GZ (Gyroscope Z)", value=f"{gz:.6f}")
+
+    return ax, ay, az, gx, gy, gz
+
+# Example usage in Streamlit app
+# accelerometer_data, gyroscope_data = get_sensor_data()  # Assuming you have a function to fetch this data
+# ax, ay, az, gx, gy, gz = display_data(accelerometer_data, gyroscope_data)
+
+
+
+# Input fields for features
+# ax = st.number_input('AX', format="%.6f")
+# ay = st.number_input('AY', format="%.6f")
+# az = st.number_input('AZ', format="%.6f")
+# gx = st.number_input('GX', format="%.6f")
+# gy = st.number_input('GY', format="%.6f")
+# gz = st.number_input('GZ', format="%.6f")
+
+
+# Button to refresh data
+if st.button('Refresh Data'):
+    accelerometer_data, gyroscope_data = get_sensor_data()
+    display_data(accelerometer_data, gyroscope_data)
+
+    
 # Button to make prediction
 if st.button('Predict'):
-    prediction = predict_outcome([ax, ay, az, gx, gy, gz])
-    # if prediction[0]:
-    #     st.markdown(f"<h2 style='color: red;'>Prediction: Fall Detected</h2>", unsafe_allow_html=True)
-    # else:
-    #     st.markdown(f"<h2 style='color: green;'>Prediction: No Fall Detected</h2>", unsafe_allow_html=True)
+    # Fetch the latest data
+    accelerometer_data, gyroscope_data = get_sensor_data()
+    ax, ay, az, gx, gy, gz = display_data(accelerometer_data, gyroscope_data)
 
+    # Proceed with prediction
+    prediction = predict_outcome([ax, ay, az, gx, gy, gz])
     # Using an expander to simulate a modal
     with st.expander("See Prediction Result", expanded=True):
         if prediction[0]:
