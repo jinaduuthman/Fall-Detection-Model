@@ -38,6 +38,15 @@ def get_sensor_data():
     
     return accelerometer_data, gyroscope_data
 
+def get_gps_data():
+    # Fetch GPS data from Firebase
+    gps_data = firebase_db.get('/GPS', None)
+    longitude = gps_data.get('longitude', 'Not available')
+    latitude = gps_data.get('latitude', 'Not available')
+    
+    return longitude, latitude
+
+
 #THis version of display_data- is only used for the predict button.
 def display_data_(accelerometer_data, gyroscope_data):
     # Extract the accelerometer and gyroscope data
@@ -104,6 +113,12 @@ try:
                     st.markdown(f"<div style='background-color:lightcoral; padding: 10px; border-radius: 5px;'> <h2 style='color: white;'>Fall Detected, Dialing 911....</h2></div>", unsafe_allow_html=True)
                 else:
                     st.markdown(f"<div style='background-color:lightgreen; padding: 10px; border-radius: 5px;'><h2 style='color: white;'>No Fall Detected</h2></div>", unsafe_allow_html=True)
+            
+            longitude, latitude = get_gps_data()  # Fetch GPS data
+            # Display the location on a map
+            map_data = pd.DataFrame({'lat': [latitude], 'lon': [longitude]})
+            st.map(map_data)
+            
     else:
         st.warning("No data available. Please check the data source.")
     
