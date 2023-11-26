@@ -82,36 +82,34 @@ def display_data(accelerometer_data, gyroscope_data, column):
 # Streamlit app layout
 st.title('Fall Detection Prediction')
 
-# Create two columns
-col1, col2 = st.columns(2)
+# Fetch and display data, and make predictions automatically
+try:
+    # Fetch new data
+    accelerometer_data, gyroscope_data = get_sensor_data()
+    if accelerometer_data and gyroscope_data:
+        col1, col2 = st.columns(2)
+        with col1:
+            display_data(accelerometer_data, gyroscope_data, col1)
 
-# Column 1 for Refresh Data
-with col1:
-    if st.button('Refresh Data'):
-        st.session_state['accelerometer_data'], st.session_state['gyroscope_data'] = get_sensor_data()
-        st.session_state['data_refreshed'] = True
+        with col2:
+            # Extract data for prediction
+            ax, ay, az, gx, gy, gz = display_data_(accelerometer_data, gyroscope_data)
 
-    # Display data if refreshed
-    if st.session_state['data_refreshed']:
-        display_data(st.session_state['accelerometer_data'], st.session_state['gyroscope_data'], col1)
-
-
-# Column 2 for Predict
-with col2:
-    if st.button('Predict'):
-        # Use the data from session state
-        if st.session_state['accelerometer_data'] and st.session_state['gyroscope_data']:
-            ax, ay, az, gx, gy, gz = display_data_(st.session_state['accelerometer_data'], st.session_state['gyroscope_data'])
-
-            # Proceed with prediction
+            # Make prediction
             prediction = predict_outcome([ax, ay, az, gx, gy, gz])
-            # Using an expander to simulate a modal
+
+            # Display prediction result
             with st.expander("See Prediction Result", expanded=True):
                 if prediction[0]:
-                    # Fall Detected
                     st.markdown(f"<div style='background-color:lightcoral; padding: 10px; border-radius: 5px;'> <h2 style='color: white;'>Fall Detected, Dialing 911....</h2></div>", unsafe_allow_html=True)
                 else:
-                    # No Fall Detected
                     st.markdown(f"<div style='background-color:lightgreen; padding: 10px; border-radius: 5px;'><h2 style='color: white;'>No Fall Detected</h2></div>", unsafe_allow_html=True)
-        else:
-            st.warning("No data available. Please refresh data first.")
+    else:
+        st.warning("No data available. Please check the data source.")
+    
+    # Rerun the app every 10 seconds
+    time.sleep(10)
+    st.experimental_rerun()
+
+except Exception as e:
+    st.error(f"An error occurred: {e}")
