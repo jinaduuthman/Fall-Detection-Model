@@ -1,5 +1,5 @@
 iotproject-venv
-best_gb_model.pkl
+# best_gb_model.pkl
 best_svm_model.pkl
 labeled_data.csv
 logreg_model.pkl
