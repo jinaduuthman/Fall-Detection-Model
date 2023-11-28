@@ -125,7 +125,7 @@ try:
         st.warning("No data available. Please check the data source.")
     
     # Rerun the app every 10 seconds
-    time.sleep(2)
+    time.sleep(15)
     st.experimental_rerun()
 
 except Exception as e:
