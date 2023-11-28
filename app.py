@@ -6,8 +6,8 @@ import streamlit as st
 import time
 
 # Load the trained model (ensure it's in the same directory or provide the full path)
-# rf_model = joblib.load('random_forest_model.pkl')
-rf_model = joblib.load('best_gb_model.pkl')
+rf_model = joblib.load('random_forest_model.pkl')
+# rf_model = joblib.load('best_gb_model.pkl')
 
 
 #Firebase settings config
