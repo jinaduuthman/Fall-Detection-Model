@@ -7,6 +7,8 @@ import time
 
 # Load the trained model (ensure it's in the same directory or provide the full path)
 rf_model = joblib.load('random_forest_model.pkl')
+# rf_model = joblib.load('best_gb_model.pkl')
+
 
 #Firebase settings config
 firebase_url = 'https://falldetection-6c89a-default-rtdb.firebaseio.com/'
@@ -26,7 +28,9 @@ if 'data_refreshed' not in st.session_state:
 
 def predict_outcome(features):
     # Convert input data into a DataFrame
-    input_data = pd.DataFrame([features], columns=['AX', 'AY', 'AZ', 'GX', 'GY', 'GZ'])
+    # input_data = pd.DataFrame([features], columns=['AX', 'AY', 'AZ', 'GX', 'GY', 'GZ'])
+    input_data = pd.DataFrame([features], columns=['AX', 'AY'])
+    
     # Predict
     prediction = rf_model.predict(input_data)
     return prediction
@@ -37,6 +41,15 @@ def get_sensor_data():
     gyroscope_data = firebase_db.get('/Gyroscope', None)
     
     return accelerometer_data, gyroscope_data
+
+def get_gps_data():
+    # Fetch GPS data from Firebase
+    gps_data = firebase_db.get('/GPS', None)
+    longitude = gps_data.get('longitude', 'Not available')
+    latitude = gps_data.get('latitude', 'Not available')
+    
+    return longitude, latitude
+
 
 #THis version of display_data- is only used for the predict button.
 def display_data_(accelerometer_data, gyroscope_data):
@@ -82,36 +95,40 @@ def display_data(accelerometer_data, gyroscope_data, column):
 # Streamlit app layout
 st.title('Fall Detection Prediction')
 
-# Create two columns
-col1, col2 = st.columns(2)
+# Fetch and display data, and make predictions automatically
+try:
+    # Fetch new data
+    accelerometer_data, gyroscope_data = get_sensor_data()
+    if accelerometer_data and gyroscope_data:
+        col1, col2 = st.columns(2)
+        with col1:
+            display_data(accelerometer_data, gyroscope_data, col1)
 
-# Column 1 for Refresh Data
-with col1:
-    if st.button('Refresh Data'):
-        st.session_state['accelerometer_data'], st.session_state['gyroscope_data'] = get_sensor_data()
-        st.session_state['data_refreshed'] = True
+        with col2:
+            # Extract data for prediction
+            ax, ay, az, gx, gy, gz = display_data_(accelerometer_data, gyroscope_data)
 
-    # Display data if refreshed
-    if st.session_state['data_refreshed']:
-        display_data(st.session_state['accelerometer_data'], st.session_state['gyroscope_data'], col1)
-
-
-# Column 2 for Predict
-with col2:
-    if st.button('Predict'):
-        # Use the data from session state
-        if st.session_state['accelerometer_data'] and st.session_state['gyroscope_data']:
-            ax, ay, az, gx, gy, gz = display_data_(st.session_state['accelerometer_data'], st.session_state['gyroscope_data'])
-
-            # Proceed with prediction
+            # Make prediction
             prediction = predict_outcome([ax, ay, az, gx, gy, gz])
-            # Using an expander to simulate a modal
+
+            # Display prediction result
             with st.expander("See Prediction Result", expanded=True):
                 if prediction[0]:
-                    # Fall Detected
                     st.markdown(f"<div style='background-color:lightcoral; padding: 10px; border-radius: 5px;'> <h2 style='color: white;'>Fall Detected, Dialing 911....</h2></div>", unsafe_allow_html=True)
                 else:
-                    # No Fall Detected
                     st.markdown(f"<div style='background-color:lightgreen; padding: 10px; border-radius: 5px;'><h2 style='color: white;'>No Fall Detected</h2></div>", unsafe_allow_html=True)
-        else:
-            st.warning("No data available. Please refresh data first.")
+            
+            longitude, latitude = get_gps_data()  # Fetch GPS data
+            # Display the location on a map
+            map_data = pd.DataFrame({'lat': [latitude], 'lon': [longitude]})
+            st.map(map_data)
+            
+    else:
+        st.warning("No data available. Please check the data source.")
+    
+    # Rerun the app every 10 seconds
+    time.sleep(5)
+    st.experimental_rerun()
+
+except Exception as e:
+    st.error(f"An error occurred: {e}")

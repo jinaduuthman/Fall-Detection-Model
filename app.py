@@ -28,7 +28,9 @@ if 'data_refreshed' not in st.session_state:
 
 def predict_outcome(features):
     # Convert input data into a DataFrame
-    input_data = pd.DataFrame([features], columns=['AX', 'AY', 'AZ', 'GX', 'GY', 'GZ'])
+    # input_data = pd.DataFrame([features], columns=['AX', 'AY', 'AZ', 'GX', 'GY', 'GZ'])
+    input_data = pd.DataFrame([features], columns=['AX', 'AY'])
+    
     # Predict
     prediction = rf_model.predict(input_data)
     return prediction
@@ -107,7 +109,9 @@ try:
             ax, ay, az, gx, gy, gz = display_data_(accelerometer_data, gyroscope_data)
 
             # Make prediction
-            prediction = predict_outcome([ax, ay, az, gx, gy, gz])
+            # prediction = predict_outcome([ax, ay, az, gx, gy, gz])
+            prediction = predict_outcome([ax, ay])
+
 
             # Display prediction result
             with st.expander("See Prediction Result", expanded=True):
@@ -125,7 +129,7 @@ try:
         st.warning("No data available. Please check the data source.")
     
     # Rerun the app every 10 seconds
-    time.sleep(5)
+    time.sleep(8)
     st.experimental_rerun()
 
 except Exception as e:
